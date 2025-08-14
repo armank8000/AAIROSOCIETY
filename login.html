@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIRO Login - Arman kr.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Country markers - white glowing dots */
+        .country-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px rgba(0, 255, 255, 0.8);
+            z-index: 2;
+            animation: pulseDot 1.5s infinite alternate;
+        }
+
+        /* Parabolic connection curves between countries */
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border: 1px solid rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px rgba(0, 255, 255, 0.6);
+            transform-origin: center;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(0,255,255,0.8), transparent);
+        }
+
+        /* Active connection animation */
+        .active-connection {
+            opacity: 1;
+            animation: pulseConnection 1.5s infinite alternate;
+        }
+
+        /* Country dot pulse animation */
+        @keyframes pulseDot {
+            from { transform: scale(1); opacity: 0.7; }
+            to { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* Connection line pulse animation */
+        @keyframes pulseConnection {
+            from { 
+                box-shadow: 0 0 10px 3px rgba(0, 255, 255, 0.8);
+                height: 5px;
+                opacity: 0.8;
+            }
+            to { 
+                box-shadow: 0 0 20px 8px rgba(0, 255, 255, 1);
+                height: 8px;
+                opacity: 1;
+            }
+        }
+        
+        .earth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        /* Earth visualization with front view (Africa/Europe centered) */
+        .earth {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            width: 80vw;
+            height: 80vw;
+            background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73751/world.topo.bathy.200407.3x5400x2700.jpg') no-repeat center center;
+            filter: brightness(0.7) contrast(1.2) drop-shadow(0 0 2px white) drop-shadow(0 0 4px white);
+            background-size: cover;
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(100, 100, 255, 0.6);
+            transition: transform 0.1s ease-out;
+            animation: rotateEarth 60s linear infinite;
+            z-index: 1;
+        }
+
+        /* Earth rotation animation */
+        @keyframes rotateEarth {
+            from { transform: translate(-50%, -50%) rotate(0deg) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(0deg) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <!-- Earth Background Animation -->
+    <div class="earth-container">
+        <div class="earth"></div>
+        <div id="country-dots"></div>
+        <div id="connection-lines"></div>
+    </div>
+    
+    <!-- Login Container -->
+    <div class="w-full max-w-md p-8 bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700">
+        <div class="flex items-center justify-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Radhe Radhe -AAIRO </h1>
+        </div>
+        
+        <h2 class="text-xl font-semibold mb-6 text-center text-gray-300">Admin Portal</h2>
+        
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <input id="username" type="text" placeholder="AAIRO ID" 
+                       class="w-full px-4 py-2.5 rounded-lg bg-gray-700/80 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition duration-200" />
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <input id="password" type="password" placeholder="••••••••" 
+                       class="w-full px-4 py-2.5 rounded-lg bg-gray-700/80 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition duration-200" />
+            </div>
+            
+            <div class="bg-gray-700/50 p-3 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-sm font-medium text-gray-400">Security Check</label>
+                    <button type="button" onclick="generateCaptcha()" class="text-xs text-blue-400 hover:text-blue-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div id="captcha-text" class="text-xl font-mono tracking-widest bg-gray-800 px-3 py-1.5 rounded text-blue-400"></div>
+                    <input id="captcha-input" type="text" placeholder="Enter CAPTCHA" 
+                           class="w-32 px-3 py-1.5 rounded bg-gray-800 border border-gray-600 text-white text-center" />
+                </div>
+            </div>
+            
+            <div id="login-error" class="text-red-400 text-sm"></div>
+            
+            <button type="button" onclick="verifyLogin()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg font-medium flex items-center justify-center transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                Authenticate
+            </button>
+        </form>
+        
+        <!-- OTP Form -->
+        <form id="otp-form" class="space-y-5 hidden mt-6">
+            <div class="text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-blue-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <p class="text-gray-300 mb-4">We've sent a 6-digit code to your registered email</p>
+            </div>
+            
+            <div>
+                <label for="otp" class="block text-sm font-medium text-gray-400 mb-1">Verification Code</label>
+                <input id="otp" type="text" maxlength="6" placeholder="123456" 
+                       class="w-full px-4 py-2.5 rounded-lg bg-gray-700/80 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition duration-200 text-center tracking-widest" />
+            </div>
+            
+            <div id="otp-error" class="text-red-400 text-sm"></div>
+            
+            <button type="button" onclick="verifyOTP()" 
+                    class="w-full bg-green-600 hover:bg-green-700 px-4 py-2.5 rounded-lg font-medium flex items-center justify-center transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Verify & Continue
+            </button>
+            
+            <div class="text-center text-sm text-gray-400">
+                Didn't receive code? <button type="button" class="text-blue-400 hover:underline">Resend</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    let generatedCaptcha = "";
+    let loginEmail = "";
+
+    // Generate random CAPTCHA
+    function generateCaptcha() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        generatedCaptcha = Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        document.getElementById("captcha-text").textContent = generatedCaptcha;
+    }
+
+    async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function verifyLogin() {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const captcha = document.getElementById('captcha-input').value.trim().toUpperCase();
+        const errorBox = document.getElementById('login-error');
+
+        errorBox.textContent = "";
+
+        if (!user || !pass) {
+            errorBox.textContent = 'Username and password required.';
+            return;
+        }
+
+        if (captcha !== generatedCaptcha) {
+            errorBox.textContent = 'Incorrect CAPTCHA.';
+            generateCaptcha();
+            return;
+        }
+
+        const hashedPass = await hashPassword(pass);
+        console.log(user);
+        console.log(hashedPass);
+
+        try {
+            const response = await fetch("https://aairosociety.com/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: user, password: hashedPass })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && !result.error) {
+                loginEmail = user;
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('otp-form').style.display = 'block';
+            } else {
+                errorBox.textContent = result.error || "Login failed.";
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            errorBox.textContent = "Server error. Try again later.";
+        }
+    }
+
+    async function verifyOTP() {
+        const otp = document.getElementById('otp').value.trim();
+        const error = document.getElementById('otp-error');
+        error.textContent = "";
+
+        if (!/^\d{6}$/.test(otp)) {
+            error.textContent = 'Enter a valid 6-digit OTP.';
+            return;
+        }
+
+        try {
+            const response = await fetch("https://aairosociety.com/admin/verify_otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ otp: otp, email: loginEmail })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && !result.error) {
+            document.cookie = `auth_token=${result.token}; path=/; max-age=${7 * 24 * 60 * 60}; secure`;
+                alert("✅ Access Granted!");
+                window.location.href = "/admin/e644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469"; // Or any secured page
+            } else {
+                error.textContent = result.error || "Invalid OTP.";
+            }
+        } catch (err) {
+            console.error("OTP error:", err);
+            error.textContent = "Verification failed. Try again.";
+        }
+    }
+
+    window.onload = function() {
+        generateCaptcha();
+    }
+</script>
+
+</body>
+</html>

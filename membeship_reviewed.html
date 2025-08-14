@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(56, 189, 248, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(56, 189, 248, 0.8)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-view {
+            display: none;
+        }
+        .active-view {
+            display: block;
+        }
+        .table-view {
+            display: none;
+        }
+        .selected-row {
+            background-color: rgba(2, 132, 199, 0.2);
+            border-left: 4px solid #0ea5e9;
+        }
+        .rejected-row {
+            background-color: rgba(220, 38, 38, 0.2);
+            border-left: 4px solid #ef4444;
+        }
+        .id-card {
+            perspective: 1000px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .id-card:hover {
+            transform: rotateY(10deg);
+        }
+        .id-card.selected {
+            border: 2px solid #0ea5e9;
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.5);
+        }
+        .id-card.rejected {
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        .pagination-btn:hover {
+            transform: translateY(-2px);
+        }
+        .hover-grow:hover {
+            transform: scale(1.02);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex">
+    <nav class="bg-gray-800 w-64 min-h-screen p-4">
+        <h2 class="text-lg font-bold mb-4">Navigation</h2>
+        <ul class="space-y-2">
+            <li>
+                <a href="e644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="g644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-users mr-2"></i>
+                    <span>Members</span>
+                </a>
+            </li>
+            <li>
+                <a href="f644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    <span>Applications</span>
+                </a>
+            </li>
+            <li>
+                <a href="#reports" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="#settings" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-cog mr-2"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="#logout" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 flex-1">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Student Management Dashboard</h1>
+            <p class="text-blue-300">View and manage student applications</p>
+            <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4 text-center">Recruit as a Fresher</h2>
+    <form id="studentForm" class="flex flex-col items-center space-y-4">
+        <input type="text" id="enrollmentInput" placeholder="Enrollment Number" class="px-4 py-2 bg-gray-800 rounded-lg border border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" required>
+        <input type="email" id="emailInput" placeholder="Email" class="px-4 py-2 bg-gray-800 rounded-lg border border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" required>
+        <button type="submit" class="px-4 py-2 bg-blue-700 rounded-lg shadow-lg hover:bg-blue-600 transition-all">Submit</button>
+    </form>
+</div>
+            
+            <div class="flex justify-center mt-6 space-x-4">
+                <button id="tableViewBtn" class="px-4 py-2 bg-blue-700 rounded-lg shadow-lg hover:bg-blue-600 transition-all flex items-center">
+                    <i class="fas fa-table mr-2"></i> Table View
+                </button>
+                <button id="cardViewBtn" class="px-4 py-2 bg-blue-800 rounded-lg shadow-lg hover:bg-blue-700 transition-all flex items-center">
+                    <i class="fas fa-id-card mr-2"></i> Card View
+                </button>
+            </div>
+        </header>
+
+        <div class="mb-8 flex justify-between items-center">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search students..." class="px-4 py-2 bg-gray-800 rounded-lg border border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                <i class="fas fa-search absolute right-3 top-3 text-blue-400"></i>
+            </div>
+            <div class="flex space-x-2">
+                <select id="statusFilter" class="px-4 py-2 bg-gray-800 rounded-lg border border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All Status</option>
+                    <option value="selected">Selected</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="table-view overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 rounded-lg overflow-hidden shadow-xl">
+                <thead class="bg-blue-900">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Student</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Enrollment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Branch</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-gray-700">
+                    <!-- Data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View -->
+        <div id="cardView" class="card-view grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display: none;">
+            <!-- Cards will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-10 flex justify-center">
+            <div class="flex space-x-2">
+                <button id="prevPage" class="pagination-btn px-4 py-2 bg-blue-800 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="pageNumbers" class="flex space-x-1">
+                    <!-- Page numbers will be inserted here by JavaScript -->
+                </div>
+                <button id="nextPage" class="pagination-btn px-4 py-2 bg-blue-800 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize students array
+        let students = [];
+        let filteredStudents = [];
+        let currentPage = 1;
+        const rowsPerPage = 5;
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+const authToken = getCookie('auth_token');
+        // Fetch student data from API
+        function fetchStudentData() {
+            // const fetchDataBtn = document.getElementById('fetchDataBtn');
+            // fetchDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Loading...</span>';
+            
+            fetch('https://aairosociety.com/admin/total_applications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({})
+                
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        alert("Invalid or expired session");
+                        window.location.href = "/admin/login_page";
+                        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        return;
+                    } else {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Assuming the API returns an array of student objects
+                students = data.map(student => ({
+                    id: student.enrollment_number, // Use enrollment_number as ID
+                    name: student.full_name,
+                    email: student.email,
+                    enrollment: student.enrollment_number,
+                    experience: student.experience,
+                    achievements: student.achievements ? [student.achievements] : [],
+                    future_goals: student.future_goals,
+                    membership_tier: student.membership_tier,
+                    branch: student.branch,
+                    semester: student.semester,
+                    status: student.reviewed,
+                    date_time: student.date_time,
+                    place: student.place,
+                    avatar: "https://randomuser.me/api/portraits/men/32.jpg" // Placeholder avatar
+                }));
+                filteredStudents = [...students]; // Initialize filtered students
+                currentPage = 1; // Reset to first page
+                renderTable();
+                renderCards();
+                renderPagination();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            })
+            
+        }
+        // Handle form submission
+document.getElementById('studentForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    const enrollmentNumber = document.getElementById('enrollmentInput').value;
+    const email = document.getElementById('emailInput').value;
+    // Send POST request
+    fetch('https://aairosociety.com/admin/confirm_applications', { // Replace with your actual API endpoint
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+            enrollmentNumber: enrollmentNumber,
+            email: email
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+             if (response.status === 503) {
+                        alert("Invalid or expired session");
+                        window.location.href = "/admin/login_page";
+                        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        return;
+                    }
+                    else if (response.status === 505) {
+                        alert("This person is already a member");
+                        return;
+                    }
+                     else if (response.status === 506) {
+                        alert("This person isn't interviewed yet");
+                        return;
+                    }else {
+                        throw new Error(`${response.statusText}`);
+                    }
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert('Data submitted successfully!');
+        // Optionally, you can reset the form
+        document.getElementById('studentForm').reset();
+    })
+    .catch(error => {
+        console.error('Error:', error.message);
+        alert('There was a problem with your submission.');
+    });
+});
+
+        // Get cookie function
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Initialize the dashboard
+        function initDashboard() {
+            // Set table view as default active
+            tableView.style.display = 'block';
+            cardView.style.display = 'none';
+            tableViewBtn.classList.add('bg-blue-700');
+            tableViewBtn.classList.remove('bg-blue-800');
+            cardViewBtn.classList.add('bg-blue-800');
+            cardViewBtn.classList.remove('bg-blue-700');
+            
+            fetchStudentData(); // Fetch student data from API
+            setupEventListeners();
+        }
+
+        // Render table view
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+            paginatedStudents.forEach(student => {
+                const row = document.createElement('tr');
+                row.className = `hover:bg-gray-700 transition-all ${student.status === 'selected' ? 'selected-row' : 'rejected-row'}`;
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <img class="h-10 w-10 rounded-full" src="${student.avatar}" alt="${student.name}">
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium">${student.name}</div>
+                                <div class="text-xs text-blue-300">${student.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${student.enrollment}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${student.branch}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${student.status === 'selected' ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'}">
+                            ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-8 py-4 whitespace-nowrap text-centre text-sm font-medium">
+                        <button onclick="viewStudentDetails('${student.id}')" class="text-blue-400 hover:text-blue-300 mr-3">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render card view
+        function renderCards() {
+            const cardView = document.getElementById('cardView');
+            cardView.innerHTML = '';
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+            paginatedStudents.forEach(student => {
+                const card = document.createElement('div');
+                card.className = `id-card ${student.status} bg-gray-800 rounded-xl shadow-lg overflow-hidden hover-grow transition-all p-6`;
+                card.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <img class="h-16 w-16 rounded-full border-2 ${student.status === 'selected' ? 'border-blue-500' : 'border-red-500'} mr-4" src="${student.avatar}" alt="${student.name}">
+                        <div>
+                            <h3 class="text-xl font-bold">${student.name}</h3>
+                            <p class="text-blue-300 text-sm">${student.enrollment}</p>
+                            <span class="text-xs px-2 py-1 rounded-full ${student.status === 'selected' ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'}">
+                                ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-gray-400 text-sm">Branch</p>
+                            <p>${student.branch}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Semester</p>
+                            <p>${student.semester}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Experience</p>
+                            <p>${student.experience}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Tier</p>
+                            <p class="${getTierTextColorClass(student.membership_tier)}">${student.membership_tier}</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-gray-400 text-sm">Achievements</p>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            ${student.achievements.map(ach => `<span class="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-100">${ach}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
+                        <button onclick="viewStudentDetails('${student.id}')" class="text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-id-card mr-1"></i> View ID
+                        </button>
+                        <div class="text-xs text-gray-400">
+                            Time of Appointment: ${new Date(student.date_time).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+                
+                cardView.appendChild(card);
+            });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
+
+            // Previous button state
+            document.getElementById('prevPage').disabled = currentPage === 1;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-4 py-2 rounded-lg ${currentPage === i ? 'bg-blue-700' : 'bg-blue-900 hover:bg-blue-800'} transition-all`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+
+            // Next button state
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+        }
+
+        // Filter students based on search and status
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            filteredStudents = students.filter(student => {
+                const matchesSearch = (
+                    student.name.toLowerCase().includes(searchTerm) ||
+                    student.email.toLowerCase().includes(searchTerm) ||
+                    student.enrollment.toLowerCase().includes(searchTerm) ||
+                    student.branch.toLowerCase().includes(searchTerm)
+                );
+                
+                const matchesStatus = status === 'all' || student.status === status;
+                
+                return matchesSearch && matchesStatus;
+            });
+
+            currentPage = 1;
+            renderTable();
+            renderCards();
+            renderPagination();
+        }
+
+        // View student details (ID card)
+        function viewStudentDetails(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="id-card ${student.status} bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl overflow-hidden w-full max-w-md mx-auto hover-glow transition-all ${student.status === 'selected' ? 'border-blue-500' : 'border-red-500'} border-2">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-1">${student.name}</h2>
+                                <p class="text-blue-300">${student.branch} - ${student.semester}</p>
+                            </div>
+                            <img class="h-20 w-20 rounded-full border-4 ${student.status === 'selected' ? 'border-blue-500' : 'border-red-500'}" src="${student.avatar}" alt="${student.name}">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <p class="text-gray-400 text-sm">Enrollment</p>
+                                <p class="font-mono">${student.enrollment}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Status</p>
+                                <p class="${student.status === 'selected' ? 'text-green-400' : 'text-red-400'} font-semibold">
+                                    ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Experience</p>
+                                <p>${student.experience}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Tier</p>
+                                <p class="${getTierTextColorClass(student.membership_tier)}">${student.membership_tier}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <p class="text-gray-400 text-sm mb-2">Achievements</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${student.achievements.map(ach => `
+                                    <span class="text-xs px-3 py-1 rounded-full bg-blue-900 text-blue-100 flex items-center">
+                                        <i class="fas fa-trophy mr-1"></i> ${ach}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <p class="text-gray-400 text-sm mb-1">Future Goals</p>
+                            <p class="italic whitespace-normal">"${student.future_goals}"</p>
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-sm text-gray-400">
+                            <div>
+                                <p>Given Time: ${new Date(student.date_time).toLocaleString()}</p>
+                                <p>Location: ${student.place}</p>
+                            </div>
+                            <div class="text-right">
+                                <p>Email: ${student.email}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-900 px-6 py-3 flex justify-between items-center">
+                        <div class="text-xs text-gray-400">
+                            Student ID: #${student.id.toString().padStart(4, '0')}
+                        </div>
+                        <button onclick="this.closest('.fixed').remove()" class="text-blue-400 hover:text-blue-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.querySelector('button').focus();
+        }
+
+        // Helper functions
+        function getTierColorClass(tier) {
+            switch(tier.toLowerCase()) {
+                case 'platinum': return 'bg-purple-900 text-purple-100';
+                case 'gold': return 'bg-yellow-700 text-yellow-100';
+                case 'silver': return 'bg-gray-500 text-gray-100';
+                case 'bronze': return 'bg-amber-800 text-amber-100';
+                default: return 'bg-blue-900 text-blue-100';
+            }
+        }
+
+        function getTierTextColorClass(tier) {
+            switch(tier.toLowerCase()) {
+                case 'platinum': return 'text-purple-300';
+                case 'gold': return 'text-yellow-300';
+                case 'silver': return 'text-gray-300';
+                case 'bronze': return 'text-amber-300';
+                default: return 'text-blue-300';
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // View toggle
+            document.getElementById('tableViewBtn').addEventListener('click', () => {
+                document.getElementById('tableView').style.display = 'block';
+                document.getElementById('cardView').style.display = 'none';
+                document.getElementById('tableViewBtn').classList.add('bg-blue-700');
+                document.getElementById('tableViewBtn').classList.remove('bg-blue-800');
+                document.getElementById('cardViewBtn').classList.add('bg-blue-800');
+                document.getElementById('cardViewBtn').classList.remove('bg-blue-700');
+            });
+
+            document.getElementById('cardViewBtn').addEventListener('click', () => {
+                document.getElementById('cardView').style.display = 'grid';
+                document.getElementById('tableView').style.display = 'none';
+                document.getElementById('cardViewBtn').classList.add('bg-blue-700');
+                document.getElementById('cardViewBtn').classList.remove('bg-blue-800');
+                document.getElementById('tableViewBtn').classList.add('bg-blue-800');
+                document.getElementById('tableViewBtn').classList.remove('bg-blue-700');
+            });
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('input', filterStudents);
+            document.getElementById('statusFilter').addEventListener('change', filterStudents);
+
+            // Pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                }
+            });
+        }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

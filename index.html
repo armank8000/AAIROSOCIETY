@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIRO | Robotics & AI Society</title>
+    <link rel="stylesheet" href="default.php?resource=css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+
+
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="container">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="logo-text">AAIRO</span>
+                <span class="logo-subtitle">Robotics & AI Society</span>
+            </div>
+            <div class="nav-links">
+                <a href="" class="nav-link active">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#events" class="nav-link">Events</a>
+                <a href="#blog" class="nav-link">Blog</a>
+                <a href="calendar" class="nav-link">Calendar</a>
+                <a href="accreditations" class="nav-link">Accreditations</a>
+                <a href="membership" class="nav-link">Membership</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+    <a href="home" class="mobile-nav-link">Home</a>
+    <a href="#about" class="mobile-nav-link">About</a>
+    <a href="#projects" class="mobile-nav-link">Projects</a>
+    <a href="#events" class="mobile-nav-link">Events</a>
+    <a href="#blog" class="mobile-nav-link">Blog</a>
+    <a href="calendar" class="mobile-nav-link">Calendar</a>
+    <a href="accreditations" class="mobile-nav-link">Accreditations</a>
+    <a href="membership" class="mobile-nav-link">Membership</a>
+</div>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-background">
+        <div class="tech-pattern"></div>
+    </div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-header">
+                <h1 class="society-name">AAIRO</h1>
+                <h1 class="society-name">Robotics & AI Society</h1>
+            </div>
+            <h2 class="hero-title">
+                Inspiring the Future with<br>
+                <span class="gradient-text">Artificial Intelligence & Robotics</span>
+            </h2>
+            <p class="hero-description">
+                AAIRO is a student-driven society at Dr. Akhilesh Das Gupta Institute Of Professional Studies in Delhi dedicated to advancing knowledge and innovation in robotics and AI. We provide a platform for workshops, competitions, research, and hands-on learning.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="joinUs()">Join Us</button>
+                <button class="btn btn-secondary" onclick="viewProjects()">Our Projects</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Overview Section -->
+<section class="overview">
+    <div class="container">
+        <h2 class="overview-title">AAIRO Overview</h2>
+        <div class="overview-grid">
+            <div class="overview-card" onclick="navigateToSection('about')">
+                <div class="card-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h3>About Us</h3>
+                <p>Learn about our mission, vision, and the impact we're making in AI and robotics</p>
+            </div>
+            <div class="overview-card" onclick="window.location.href='accreditations'">
+                <div class="card-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Accreditations</h3>
+                <p>Our certifications, partnerships, and recognition in the academic community</p>
+            </div>
+            <div class="overview-card" onclick="window.location.href='membership'">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Membership</h3>
+                <p>Join our community of innovators and gain access to exclusive resources</p>
+            </div>
+            <div class="overview-card" onclick="window.location.href='calendar'">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Calendar</h3>
+                <p>Stay updated with upcoming events, workshops, and competitions</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Buzz Section -->
+<section class="latest-buzz">
+    <div class="container">
+        <h2 class="buzz-title">LATEST BUZZ</h2>
+        <div class="buzz-grid" id="buzzGrid">
+            <!-- News items will be populated by JavaScript -->
+        </div>
+
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about-section" id="about">
+    <div class="container">
+        <div class="section-content">
+            <h2>About AAIRO</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <!--<p>The AI and Robotics Society is a dynamic community of forward-thinking college students passionate about shaping a better future through innovation and technology. Our mission is to explore and advance the frontiers of artificial intelligence and robotics, empowering students with the knowledge, skills, and hands-on experience needed to drive meaningful change. By fostering collaboration, creativity, and curiosity, we aim to solve real-world problems, promote ethical development, and contribute to a smarter, more sustainable world. Together, we are building the future—one breakthrough at a time.</p>-->
+                    <h3>Vision</h3>
+                    <p>To become a leading student-driven hub that fosters innovation, research, and ethical development in the fields of artificial intelligence and robotics, contributing to a smarter and more sustainable future.</p>
+                    <h3>Mission</h3>
+                    <ul>
+                        <li>To create a collaborative environment where students can learn, experiment, and innovate in AI and robotics.</li>
+                        <li>To bridge the gap between academic knowledge and real-world applications through workshops, projects, competitions, and industry engagement.</li>
+                        <li>To encourage ethical awareness and responsible use of AI and robotics technologies for the betterment of society.</li>
+                        <li>To inspire leadership, teamwork, and a lifelong passion for emerging technologies.</li>
+                        <p> </p>
+                    </ul>
+                    <h3>Leadership</h3>
+                    <p><strong>Director Sir:</strong> Dr. Niranjan Bhattacharyya </p>
+                    <p><strong>Founder Faculty Member:</strong> Mr. Yashpal Chopra, Assistant Professor</p>
+                    <p><strong>Founder Faculty Member:</strong> Dr. Pardeep Rohilla, Associate Professor</p>
+                    <p><strong>Student Coordinator:</strong> Vishv Dhama & Mahak</p>
+                    <!--<p>(Later on Add team photos and designations)</p>-->
+                    <!--<div class="stats">-->
+                    <!--    <div class="stat">-->
+                    <!--        <span class="stat-number">500+</span>-->
+                    <!--        <span class="stat-label">Active Members</span>-->
+                    <!--    </div>-->
+                    <!--    <div class="stat">-->
+                    <!--        <span class="stat-number">50+</span>-->
+                    <!--        <span class="stat-label">Projects Completed</span>-->
+                    <!--    </div>-->
+                    <!--    <div class="stat">-->
+                    <!--        <span class="stat-number">25+</span>-->
+                    <!--        <span class="stat-label">Workshops Conducted</span>-->
+                    <!--    </div>-->
+                    <!--</div>-->
+                </div>
+                <div class="about-features">
+                    <div class="feature">
+                        <i class="fas fa-robot"></i>
+                        <h4>Robotics Innovation</h4>
+                        <p>Hands-on experience with cutting-edge robotics platforms and technologies</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-brain"></i>
+                        <h4>AI Research</h4>
+                        <p>Collaborative research projects in machine learning and artificial intelligence</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>Skill Development</h4>
+                        <p>Comprehensive workshops and training programs for all skill levels</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-trophy"></i>
+                        <h4>Competitions</h4>
+                        <p>Participate in national and international robotics competitions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Projects Section -->
+<section class="projects-section" id="projects">
+    <div class="container">
+        <h2>Our Projects</h2>
+        <p class="hero-description">At AAIRO, we actively foster innovation and technical excellence through hands-on projects that solve real-world problems using automation, robotics, and artificial intelligence. Below is a curated overview of our past achievements, ongoing developments, and future ambitions.</p>
+        <div class="projects-grid" id="projectsGrid">
+            <!-- Projects will be populated by JavaScript -->
+        </div>
+    </div>
+</section>
+
+<!-- Events Section -->
+<section class="events-section" id="events">
+    <div class="container">
+        <h2>Upcoming Events all over India</h2>
+        <div class="events-grid" id="eventsGrid">
+            <!-- Events will be populated by JavaScript -->
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="blog-section" id="blog">
+    <div class="container">
+        <h2>Latest Blog Posts</h2>
+        <div class="blog-grid" id="blogGrid">
+            <!-- Blog posts will be populated by JavaScript -->
+        </div>
+        <div class="blog-footer">
+            <button class="btn btn-outline" onclick="loadMoreBlogs()">View All Posts</button>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>AAIRO – Automation with Artificial Intelligence and Robotics</h3>
+                <p>Inspiring the future with Artificial Intelligence & Robotics</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/aairo_adgips/" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/aairo-automation-with-ai-and-robotics-41bb20374/" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <!-- Add other social links if available -->
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#events">Events</a></li>
+                    <li><a href="blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <!--<li><a href="#">IEEE RAS</a></li>-->
+                    <li><a href="#">Research Papers</a></li>
+                    <li><a href="#">Tutorials</a></li>
+                    <li><a href="#">Documentation</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> aairosociety@gmail.com</li>
+                    <!--<li><i class="fas fa-phone"></i> +91-XXXXXXXXXX</li>-->
+                    <li><i class="fas fa-map-marker-alt"></i> Dr. Akhilesh Das Gupta Institute of Professional studies, Shastri Park, New Delhi – 110053</li>
+                    <li><i class="fas fa-user-tie"></i> Faculty Coordinator: Yashpal Chopra (yashpalchopra@adgips.ac.in)</li>
+                    <!--<li><i class="fas fa-user"></i> President: Vishv dhama</li>-->
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 AAIRO - Robotics & AI Society. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner"></div>
+</div>
+
+<script src="default.php?resource=js" type="text/javascript"></script>
+</body>
+</html>
+

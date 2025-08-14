@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AAIRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            100: '#E5E7EB',
+                            200: '#D1D5DB',
+                            300: '#9CA3AF',
+                            400: '#6B7280',
+                            500: '#4B5563',
+                            600: '#374151',
+                            700: '#1F2937',
+                            800: '#111827',
+                            900: '#0F172A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .checkbox-container:hover .checkbox {
+            border-color: #3B82F6;
+        }
+        .checkbox-container:hover .checkbox-label {
+            color: #E5E7EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex">
+    <!-- Side Navbar -->
+    <nav class="bg-gray-800 w-64 min-h-screen p-4">
+        <h2 class="text-lg font-bold mb-4">Navigation</h2>
+        <ul class="space-y-2">
+            <li>
+                <a href="#dashboard" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="g644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-users mr-2"></i>
+                    <span>Members</span>
+                </a>
+            </li>
+            <li>
+                <a href="f644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    <span>Applications</span>
+                </a>
+            </li>
+            <li>
+                <a href="" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="#settings" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-cog mr-2"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="#logout" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 flex-1">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-3 rounded-lg">
+                    <i class="fas fa-briefcase text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold">radhe radhe</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button id="datePickerBtn" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="selectedDate">Select Date</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="datePicker" class="hidden absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10 p-4 w-64">
+                        <input type="date" id="dateInput" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        <div class="flex justify-between mt-3">
+                            <button id="cancelDate" class="px-3 py-1 text-gray-300 hover:text-white">Cancel</button>
+                            <button id="applyDate" class="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="fetchDataBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Fetch Data</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-blue-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-400">Total Members</p>
+                            <h3 class="text-2xl font-bold" id="totalMembers">0</h3>
+                        </div>
+                        <div class="bg-blue-500/20 p-3 rounded-full">
+                            <i class="fas fa-users text-blue-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-400">Students</p>
+                            <h3 class="text-2xl font-bold" id="studentCount">0</h3>
+                        </div>
+                        <div class="bg-green-500/20 p-3 rounded-full">
+                            <i class="fas fa-graduation-cap text-green-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-400">Professionals</p>
+                            <h3 class="text-2xl font-bold" id="professionalCount">0</h3>
+                        </div>
+                        <div class="bg-purple-500/20 p-3 rounded-full">
+                            <i class="fas fa-user-tie text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg mb-8">
+                <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                    <h2 class="text-lg font-semibold">Member Applications</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="selectAllBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm">
+                            Select All
+                        </button>
+                        <button id="sendSelectedBtn" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm flex items-center gap-1">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Selected</span>
+                        </button>
+                        <button id="sendRejectedBtn" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm flex items-center gap-1">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Rejected</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto scrollbar-hide">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Select
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Name
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Email
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Tier
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Programme
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Applied On
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                            <!-- Data will be inserted here by JavaScript -->
+                            <tr id="noDataRow">
+                                <td colspan="7" class="px-6 py-4 text-center text-gray-400">
+                                    No data available. Click "Fetch Data" to load members.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t border-gray-700 flex justify-between items-center">
+                    <div class="text-sm text-gray-400" id="tableInfo">
+                        Showing 0 to 0 of 0 entries
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="prevPage" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50" disabled>
+                            Previous
+                        </button>
+                        <button id="nextPage" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50" disabled>
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Member Details Modal -->
+        <div id="memberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-800 rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto fade-in">
+                <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Member Details</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-gray-400 text-sm">Full Name</p>
+                        <p id="modalFullName" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Email</p>
+                        <p id="modalEmail" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Enrollment Number</p>
+                        <p id="modalEnrollment" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Membership Tier</p>
+                        <p id="modalTier" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Programme</p>
+                        <p id="modalProgramme" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Batch</p>
+                        <p id="modalBatch" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Branch</p>
+                        <p id="modalBranch" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Semester</p>
+                        <p id="modalSemester" class="font-medium">-</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-gray-400 text-sm">Applied On</p>
+                        <p id="modalAppliedOn" class="font-medium">-</p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-gray-400 text-sm">Experience</p>
+                    <p id="modalExperience" class="mt-1 bg-gray-700 p-3 rounded-lg">-</p>
+                </div>
+                
+                <div>
+                    <p class="text-gray-400 text-sm">Achievement</p>
+                    <p id="modalAchievement" class="mt-1 bg-gray-700 p-3 rounded-lg">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm">Future Goals</p>
+                    <p id="modalFutureGoals" class="mt-1 bg-gray-700 p-3 rounded-lg">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Date Selection Modal -->
+        <div id="dateSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-800 rounded-lg w-full max-w-md mx-4 p-6 fade-in">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Schedule Details</h3>
+                    <button id="closeDateModal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Date & Time</label>
+                        <input type="datetime-local" id="futureDateTimeInput" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" min="${new Date().toISOString().slice(0, 16)}">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="dateTimeError">Please select a future date and time</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Place</label>
+                        <input type="text" id="placeInput" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" placeholder="Enter location/venue" required>
+                        <p class="text-red-500 text-sm mt-1 hidden" id="placeError">Please enter a place</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button id="cancelDateSelection" class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button id="confirmDateSelection" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 hidden max-w-xs fade-in">
+            <div class="flex items-start">
+                <div id="toastIcon" class="mr-3 mt-1">
+                    <i class="fas fa-info-circle text-blue-500"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 id="toastTitle" class="font-medium">Notification</h4>
+                    <p id="toastMessage" class="text-sm text-gray-300 mt-1">This is a notification message.</p>
+                </div>
+                <button id="closeToast" class="ml-4 text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM Elements
+     // DOM Elements
+const fetchDataBtn = document.getElementById('fetchDataBtn');
+const membersTableBody = document.getElementById('membersTableBody');
+const noDataRow = document.getElementById('noDataRow');
+const totalMembersEl = document.getElementById('totalMembers');
+const studentCountEl = document.getElementById('studentCount');
+const professionalCountEl = document.getElementById('professionalCount');
+const tableInfoEl = document.getElementById('tableInfo');
+const prevPageBtn = document.getElementById('prevPage');
+const nextPageBtn = document.getElementById('nextPage');
+const selectAllBtn = document.getElementById('selectAllBtn');
+const sendSelectedBtn = document.getElementById('sendSelectedBtn'); // Ensure this ID is correct
+const sendRejectedBtn = document.getElementById('sendRejectedBtn');
+const datePickerBtn = document.getElementById('datePickerBtn');
+const datePicker = document.getElementById('datePicker');
+const dateInput = document.getElementById('dateInput');
+const applyDateBtn = document.getElementById('applyDate');
+const cancelDateBtn = document.getElementById('cancelDate');
+const selectedDateEl = document.getElementById('selectedDate');
+const memberModal = document.getElementById('memberModal');
+const closeModalBtn = document.getElementById('closeModal');
+const toast = document.getElementById('toast');
+const closeToastBtn = document.getElementById('closeToast');
+const toastTitle = document.getElementById('toastTitle');
+const toastMessage = document.getElementById('toastMessage');
+const toastIcon = document.getElementById('toastIcon');
+
+// State
+let membersData = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+let selectedDate = null;
+let currentModalMember = null;
+let selectedMembersToSend = [];
+let rejectedMembersToSend = [];
+
+// Event Listeners
+fetchDataBtn.addEventListener('click', fetchMembersData);
+prevPageBtn.addEventListener('click', () => changePage(-1));
+nextPageBtn.addEventListener('click', () => changePage(1));
+selectAllBtn.addEventListener('click', toggleSelectAll);
+sendSelectedBtn.addEventListener('click', sendSelectedMembers);
+sendRejectedBtn.addEventListener('click', sendRejectedMembers);
+datePickerBtn.addEventListener('click', toggleDatePicker);
+applyDateBtn.addEventListener('click', applyDateFilter);
+cancelDateBtn.addEventListener('click', cancelDateFilter);
+closeModalBtn.addEventListener('click', closeMemberModal);
+closeToastBtn.addEventListener('click', hideToast);
+document.getElementById('closeDateModal').addEventListener('click', closeDateSelectionModal);
+document.getElementById('cancelDateSelection').addEventListener('click', closeDateSelectionModal);
+document.getElementById('confirmDateSelection').addEventListener('click', confirmDateSelection);
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Get the token from cookie
+const authToken = getCookie('auth_token');
+// Functions
+function fetchMembersData() {
+    fetchDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Loading...</span>';
+    
+    fetch('https://aairosociety.com/admin/show_applications', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 503) {
+                alert("Invalid or expired session");
+                window.location.href = "/admin/login_page";
+                document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                return;
+            } else {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+        }
+        return response.json();
+    })
+    .then(data => {
+        membersData = data;
+        updateStats();
+        renderTable();
+        showToast('Success', 'Data fetched successfully', 'success');
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+        showToast('Error', 'Failed to fetch data', 'error');
+    })
+    .finally(() => {
+        fetchDataBtn.innerHTML = '<i class="fas fa-sync-alt"></i> <span>Fetch Data</span>';
+    });
+}
+
+function updateStats() {
+    const total = membersData.length;
+    const students = membersData.filter(m => m.membership_tier === 'Student').length;
+    const professionals = membersData.filter(m => m.membership_tier === 'Professional').length;
+    
+    totalMembersEl.textContent = total;
+    studentCountEl.textContent = students;
+    professionalCountEl.textContent = professionals;
+}
+
+function renderTable() {
+    if (membersData.length === 0) {
+        noDataRow.classList.remove('hidden');
+        membersTableBody.innerHTML = '';
+        membersTableBody.appendChild(noDataRow);
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        tableInfoEl.textContent = 'Showing 0 to 0 of 0 entries';
+        return;
+    }
+
+    noDataRow.classList.add('hidden');
+    
+    // Filter by date if selected
+    let filteredData = [...membersData];
+    if (selectedDate) {
+        const selectedDateStr = selectedDate.toISOString().split('T')[0];
+        filteredData = membersData.filter(member => {
+            const memberDate = member.created_at.split(' ')[0];
+            return memberDate === selectedDateStr;
+        });
+    }
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+
+    membersTableBody.innerHTML = '';
+
+    paginatedData.forEach((member, index) => {
+        const originalIndex = startIndex + index; // Calculate the original index
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-700/50';
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="checkbox-container flex items-center">
+                    <input type="checkbox" class="checkbox h-4 w-4 text-blue-600 rounded border-gray-300 bg-gray-700 focus:ring-blue-500" data-id="${originalIndex}">
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
+                        <i class="fas fa-user text-gray-300"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium">${member.full_name}</div>
+                        <div class="text-sm text-gray-400">${member.enrollment_number || 'N/A'}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm">${member.email}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${member.membership_tier === 'Student' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}">
+                    ${member.membership_tier}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                ${member.programme || 'N/A'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                ${formatDateTime(member.created_at)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="view-member text-blue-500 hover:text-blue-400 mr-3" data-id="${originalIndex}">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="delete-member text-red-500 hover:text-red-400" data-id="${originalIndex}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        `;
+        membersTableBody.appendChild(row);
+    });
+
+    // Add event listeners to view and delete buttons
+    document.querySelectorAll('.view-member').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const originalIndex = e.currentTarget.getAttribute('data-id'); // Get the original index
+            showMemberModal(membersData[originalIndex]); // Use the original index to get the member data
+        });
+    });
+
+    document.querySelectorAll('.delete-member').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const memberIndex = e.currentTarget.getAttribute('data-id');
+            // Implement delete functionality if needed
+            showToast('Info', 'Delete functionality not implemented', 'info');
+        });
+    });
+
+    // Update pagination info
+    const totalFiltered = filteredData.length;
+    tableInfoEl.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${totalFiltered} entries`;
+    
+    // Update pagination buttons
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = endIndex >= totalFiltered;
+}
+
+function changePage(direction) {
+    const newPage = currentPage + direction;
+    const totalPages = Math.ceil(membersData.length / rowsPerPage);
+    
+    if (newPage > 0 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderTable();
+    }
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+    
+    selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
+}
+
+function sendSelectedMembers() {
+    const checkboxes = document.querySelectorAll('.checkbox:checked');
+    if (checkboxes.length === 0) {
+        showToast('Warning', 'No members selected', 'warning');
+        return;
+    }
+
+    const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+    selectedMembersToSend = selectedIndices.map(i => membersData[i]);
+    
+    // Show schedule details modal
+    document.getElementById('dateSelectionModal').classList.remove('hidden');
+    document.getElementById('futureDateTimeInput').value = '';
+    document.getElementById('futureDateTimeInput').min = new Date().toISOString().slice(0, 16);
+    document.getElementById('placeInput').value = '';
+    document.getElementById('dateTimeError').classList.add('hidden');
+    document.getElementById('placeError').classList.add('hidden');
+}
+
+function sendRejectedMembers() {
+    const checkboxes = document.querySelectorAll('.checkbox:checked');
+    if (checkboxes.length === 0) {
+        showToast('Warning', 'No members selected', 'warning');
+        return;
+    }
+
+    const rejectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+    rejectedMembersToSend = rejectedIndices.map(i => membersData[i]);
+    sendRejectedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
+    
+    // Prepare data to send
+    const dataToSend = {
+        members: rejectedMembersToSend.map(m => ({
+            enrollment_number: m.enrollment_number,
+            email: m.email,
+           // Send selected members
+        }))
+    };
+
+    fetch('https://aairosociety.com/admin/rejected', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+            
+        },
+        body: JSON.stringify(dataToSend)
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 503) {
+                alert("Invalid or expired session");
+                document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = "/admin/login_page"; // Redirect to login page
+                return;
+            } else {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+        }
+        return response.json();
+    })
+    .then(data => {
+        showToast('Success', 'Rejected members sent successfully', 'error');
+        // Remove sent members from the table
+        const rejectedIndices = rejectedMembersToSend.map(m => membersData.indexOf(m));
+        membersData = membersData.filter((_, index) => !rejectedIndices.includes(index));
+        updateStats();
+        renderTable();
+    })
+    .catch(error => {
+        console.error('Error sending data:', error);
+        showToast('Error', 'Failed to send selected members', 'error');
+    })
+    .finally(() => {
+        sendRejectedBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Send Selected</span>';
+        rejectedMembersToSend = [];
+    });
+    
+
+}
+
+function confirmDateSelection() {
+    const futureDateTimeInput = document.getElementById('futureDateTimeInput');
+    const dateTimeError = document.getElementById('dateTimeError');
+    const placeInput = document.getElementById('placeInput');
+    const placeError = document.getElementById('placeError');
+    
+    // Reset errors
+    dateTimeError.classList.add('hidden');
+    placeError.classList.add('hidden');
+    
+    let isValid = true;
+    
+    // Validate date/time
+    if (!futureDateTimeInput.value) {
+        dateTimeError.textContent = 'Please select a date and time';
+        dateTimeError.classList.remove('hidden');
+        isValid = false;
+    } else {
+        const selectedDateTime = new Date(futureDateTimeInput.value);
+        const now = new Date();
+        
+        if (selectedDateTime <= now) {
+            dateTimeError.textContent = 'Please select a future date and time';
+            dateTimeError.classList.remove('hidden');
+            isValid = false;
+        }
+    }
+    
+    // Validate place
+    if (!placeInput.value.trim()) {
+        placeError.textContent = 'Please enter a place';
+        placeError.classList.remove('hidden');
+        isValid = false;
+    }
+    
+    if (!isValid) return;
+    
+    closeDateSelectionModal();
+    sendMembersWithDetails(futureDateTimeInput.value, placeInput.value.trim());
+}
+
+function closeDateSelectionModal() {
+    document.getElementById('dateSelectionModal').classList.add('hidden');
+}
+
+
+
+function sendMembersWithDetails(dateTime, place) {
+    sendSelectedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
+    
+    // Prepare data to send
+    const dataToSend = {
+        date_time: dateTime,
+        place: place,
+        members: selectedMembersToSend.map(m => ({
+            enrollment_number: m.enrollment_number,
+            email: m.email,
+           // Send selected members
+        }))
+    };
+
+    fetch('https://aairosociety.com/admin/reviewed', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(dataToSend)
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 503) {
+                alert("Invalid or expired session");
+                document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = "/admin/login_page"; // Redirect to login page
+                return;
+            } else {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+        }
+        return response.json();
+    })
+    .then(data => {
+        showToast('Success', 'Selected members sent successfully', 'success');
+        // Remove sent members from the table
+        const selectedIndices = selectedMembersToSend.map(m => membersData.indexOf(m));
+        membersData = membersData.filter((_, index) => !selectedIndices.includes(index));
+        updateStats();
+        renderTable();
+    })
+    .catch(error => {
+        console.error('Error sending data:', error);
+        showToast('Error', 'Failed to send selected members', 'error');
+    })
+    .finally(() => {
+        sendSelectedBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Send Selected</span>';
+        selectedMembersToSend = [];
+    });
+}
+
+function toggleDatePicker() {
+    datePicker.classList.toggle('hidden');
+}
+
+function applyDateFilter() {
+    if (dateInput.value) {
+        selectedDate = new Date(dateInput.value);
+        selectedDateEl.textContent = selectedDate.toLocaleDateString();
+        currentPage = 1;
+        renderTable();
+    }
+    datePicker.classList.add('hidden');
+}
+
+function cancelDateFilter() {
+    dateInput.value = '';
+    datePicker.classList.add('hidden');
+}
+
+function showMemberModal(member) {
+    currentModalMember = member;
+    document.getElementById('modalExperience').textContent = member.experience || 'Not Available';
+    document.getElementById('modalFullName').textContent = member.full_name || 'Not Available';
+    document.getElementById('modalEmail').textContent = member.email || 'Not Available';
+    document.getElementById('modalEnrollment').textContent = member.enrollment_number || 'Not Available';
+    document.getElementById('modalTier').textContent = member.membership_tier || 'Not Available';
+    document.getElementById('modalProgramme').textContent = member.programme || 'Not Available';
+    document.getElementById('modalBatch').textContent = member.batch || 'Not Available';
+    document.getElementById('modalBranch').textContent = member.branch || 'Not Available';
+    document.getElementById('modalAchievement').textContent = member.achievements || 'Not Available';
+    document.getElementById('modalFutureGoals').textContent = member.future_goals || 'Not Available';
+    document.getElementById('modalSemester').textContent = member.semester || 'Not Available';
+    document.getElementById('modalAppliedOn').textContent = formatDateTime(member.created_at) || 'Not Available';
+    
+    memberModal.classList.remove('hidden');
+}
+
+function closeMemberModal() {
+    memberModal.classList.add('hidden');
+    currentModalMember = null;
+}
+
+function showToast(title, message, type) {
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    
+    // Set icon and color based on type
+    let iconClass, iconColor;
+    switch (type) {
+        case 'success':
+            iconClass = 'fa-check-circle';
+            iconColor = 'text-green-500';
+            break;
+        case 'error':
+            iconClass = 'fa-exclamation-circle';
+            iconColor = 'text-red-500';
+            break;
+        case 'warning':
+            iconClass = 'fa-exclamation-triangle';
+            iconColor = 'text-yellow-500';
+            break;
+        default: // info
+            iconClass = 'fa-info-circle';
+            iconColor = 'text-blue-500';
+    }
+    
+    toastIcon.innerHTML = `<i class="fas ${iconClass} ${iconColor}"></i>`;
+    toast.classList.remove('hidden');
+    
+    // Auto-hide after 5 seconds
+    setTimeout(hideToast, 5000);
+}
+
+function hideToast() {
+    toast.classList.add('hidden');
+}
+
+function formatDateTime(dateTimeStr) {
+    if (!dateTimeStr) return 'N/A';
+    
+    const date = new Date(dateTimeStr);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    return date.toLocaleString();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    // You can auto-fetch data on load if needed
+    // fetchMembersData();
+});
+
+    </script>
+</body>
+</html>

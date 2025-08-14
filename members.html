@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(56, 189, 248, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(56, 189, 248, 0.8)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-view { display: none; }
+        .active-view { display: block; }
+        .table-view { display: none; }
+        .selected-row { background-color: rgba(2, 132, 199, 0.2); border-left: 4px solid #0ea5e9; }
+        .rejected-row { background-color: rgba(220, 38, 38, 0.2); border-left: 4px solid #ef4444; }
+        .id-card { perspective: 1000px; transition: transform 0.6s; transform-style: preserve-3d; }
+        .id-card:hover { transform: rotateY(10deg); }
+        .id-card.selected { border: 2px solid #0ea5e9; box-shadow: 0 0 20px rgba(2, 132, 199, 0.5); }
+        .id-card.rejected { border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .pagination-btn:hover { transform: translateY(-2px); }
+        .hover-grow:hover { transform: scale(1.02); }
+        .transition-all { transition: all 0.3s ease; }
+        .student-checkbox { transform: scale(1.2); }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* ID Card Styles */
+        .id-card-container {
+            width: 95mm;
+            height: 54mm;
+            perspective: 1000px;
+            position: relative;
+        }
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.1; /* Equivalent to opacity-10 */
+            z-index: 0;
+        }
+        .id-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .id-card-flipped .id-card-inner {
+            transform: rotateY(180deg);
+        }
+        .id-card-front, .id-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .id-card-back {
+            transform: rotateY(180deg);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-id-card, .print-id-card * {
+                visibility: visible;
+            }
+            .print-id-card {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Tier-specific background colors */
+.membership-student {
+    background: linear-gradient(135deg, #16537e 0%, #0f3b58 100%);
+}
+
+.membership-professional {
+    background: linear-gradient(135deg, #274e13 0%, #1b350d 100%);
+}
+
+.membership-oc {
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+}
+
+.membership-default {
+    background: linear-gradient(135deg, #16537e 0%, #0f3b58 100%);
+}
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex">
+
+    <nav class="bg-gray-800 w-64 min-h-screen p-4">
+        <h2 class="text-lg font-bold mb-4">Navigation</h2>
+        <ul class="space-y-2">
+            <li>
+                <a href="e644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#members" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-users mr-2"></i>
+                    <span>Members</span>
+                </a>
+            </li>
+            <li>
+                <a href="f644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    <span>Applications</span>
+                </a>
+            </li>
+            <li>
+                <a href="g644df618fef9fdd44dd7f26f1077051e49538f1b70603631cdf0de7c69fb469" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="#settings" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-cog mr-2"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="#logout" class="flex items-center p-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 flex-1">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Student ID Card Management</h1>
+            <p class="text-blue-300">View, manage and print student ID cards</p>
+            
+            <div class="flex justify-center mt-6 space-x-4">
+                <button id="tableViewBtn" class="px-4 py-2 bg-blue-700 rounded-lg shadow-lg hover:bg-blue-600 transition-all flex items-center">
+                    <i class="fas fa-table mr-2"></i> Table View
+                </button>
+                <button id="cardViewBtn" class="px-4 py-2 bg-blue-800 rounded-lg shadow-lg hover:bg-blue-700 transition-all flex items-center">
+                    <i class="fas fa-id-card mr-2"></i> Card View
+                </button>
+            </div>
+        </header>
+
+        <div class="mb-8 flex justify-between items-center">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search students..." class="px-4 py-2 bg-gray-800 rounded-lg border border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                <i class="fas fa-search absolute right-3 top-3 text-blue-400"></i>
+            </div>
+            <div class="relative">
+                <label for="qrUpload" class="px-4 py-2 bg-blue-700 rounded-lg hover:bg-blue-600 cursor-pointer flex items-center">
+                    <i class="fas fa-qrcode mr-2"></i> Scan QR
+                    <input type="file" id="qrUpload" accept="image/*" class="hidden" onchange="scanQRCode(event)">
+                </label>
+            </div>
+            <div class="flex space-x-2">
+                <button id="sendEmailsBtn" class="px-4 py-2 bg-green-700 rounded-lg hover:bg-green-600 transition-all flex items-center disabled:opacity-50" disabled>
+                    <i class="fas fa-paper-plane mr-2"></i> Send Emails
+                </button>
+                <span id="selectedCount" class="px-4 py-2 text-sm text-gray-300">0 members selected</span>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="table-view overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 rounded-lg overflow-hidden shadow-xl">
+                <thead class="bg-blue-900">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Student</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Enrollment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Branch</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Semester</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                            <input type="checkbox" id="selectAll" class="rounded text-blue-600">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-gray-700">
+                    <!-- Data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View -->
+        <div id="cardView" class="card-view grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display: none;">
+            <!-- Cards will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-10 flex justify-center">
+            <div class="flex space-x-2">
+                <button id="prevPage" class="pagination-btn px-4 py-2 bg-blue-800 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="pageNumbers" class="flex space-x-1">
+                    <!-- Page numbers will be inserted here by JavaScript -->
+                </div>
+                <button id="nextPage" class="pagination-btn px-4 py-2 bg-blue-800 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ID Card Modal -->
+    <div id="idCardModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Student ID Card</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-6 mb-6">
+                <!-- ID Card Preview -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-3">Preview</h3>
+                    <div id="idCardContainer" class="id-card-container mx-auto mb-4">
+                        <div class="id-card-inner">
+                            <!-- Front of ID Card -->
+                            <div id="idCardFront" class="id-card-front text-white p-4 relative">
+                                <img src="https://aairosociety.com/AAIRO_logo" class="watermark">
+                                <div class="flex justify-between items-start h-full">
+                                    <div class="flex-1">
+                                        <div class="text-center mb-2">
+                                            <h3 class="text-xl font-bold">AAIRO SOCIETY</h3>
+                                            <p class="text-xs">Department of Artificial Intelligence</p>
+                                        </div>
+                                        <div class="flex items-center mb-3">
+                                            <div class="h-20 w-20 rounded-full border-4 border-white mr-4 flex items-center justify-center bg-blue-700">
+                                                <i class="fas fa-user text-3xl"></i>
+                                            </div>
+                                            <div>
+                                                <h4 id="idCardName" class="text-lg font-bold"></h4>
+                                                <p id="idCardEnrollment" class="text-sm"></p>
+                                                <p id="idCardEmail" class="text-xs"></p>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div>
+                                                <p class="font-semibold">Branch:</p>
+                                                <p id="idCardBranch"></p>
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold">Role:</p>
+                                                <p id="idCardRole"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div>
+                                            <p class="font-semibold">Tier:</p>
+                                            <p id="idCardTier"></p>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Semester:</p>
+                                            <p id="idCardSemester"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-2 right-2 text-xs opacity-70">Enrollment: <span id="idCardEnrollmentNum"></span></div>
+                            </div>
+                            
+                            <!-- Back of ID Card -->
+                            <div class="id-card-back bg-white text-gray-800 p-4">
+                                <div class="h-full flex flex-col">
+                                    <div class="text-center mb-2">
+                                        <h3 class="text-xl font-bold text-blue-800">AAIRO SOCIETY</h3>
+                                        <p class="text-xs text-gray-600">Department of Artificial Intelligence</p>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-center">
+                                        <div id="idCardQrCode" class="p-2 bg-white"></div>
+                                    </div>
+                                    <div class="text-center text-xs text-gray-600 mt-2">
+                                        <p>Scan QR code to verify membership</p>
+                                        <p class="font-bold mt-1">www.aairosociety.com/verify</p>
+                                    </div>
+                                    <div class="text-center text-[8px] text-gray-500 mt-2">
+                                        <p>This card is property of AAIRO Society and must be returned upon request.</p>
+                                        <p>Unauthorized duplication is prohibited.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <button onclick="flipIdCard()" class="px-4 py-2 bg-blue-700 rounded-lg hover:bg-blue-600">
+                            <i class="fas fa-sync-alt mr-2"></i> Flip Card
+                        </button>
+                        <button onclick="printIdCard()" class="px-4 py-2 bg-green-700 rounded-lg hover:bg-green-600">
+                            <i class="fas fa-print mr-2"></i> Print ID Card
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Student Details -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-3">Student Details</h3>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Full Name</p>
+                                <p id="detailName" class="font-medium"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Enrollment</p>
+                                <p id="detailEnrollment" class="font-mono"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Email</p>
+                                <p id="detailEmail"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Branch</p>
+                                <p id="detailBranch"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Semester</p>
+                                <p id="detailSemester"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Membership Tier</p>
+                                <p id="detailTier"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Role</p>
+                                <p id="detailRole"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-gray-400 text-sm">Experience</p>
+                            <p id="detailExperience" class="whitespace-pre-line"></p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-gray-400 text-sm">Achievements</p>
+                            <div id="detailAchievements" class="flex flex-wrap gap-2 mt-1"></div>
+                        </div>
+                        
+                        <div>
+                            <p class="text-gray-400 text-sm">Future Goals</p>
+                            <p id="detailGoals" class="italic whitespace-pre-line"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Sample student data
+        let students = [
+            {
+                name: 'Rahul Sharma',
+                email: 'rahul.sharma@example.com',
+                enrollment: 'EN2021001',
+                branch: 'Computer Science',
+                semester: '4th',
+                role: 'Core Member',
+                experience: '2 years in AI projects\nPython, TensorFlow, PyTorch',
+                achievements: ['Hackathon Winner 2022', 'Best Project Award'],
+                future_goals: 'To develop AI solutions for healthcare and improve diagnostic accuracy using deep learning.',
+                membership_tier: 'oc',
+                date_time: '2023-05-15T10:30:00',
+                place: 'AI Lab, Block B'
+            },
+            {
+                name: 'Priya Patel',
+                email: 'priya.patel@example.com',
+                enrollment: 'EN2021002',
+                branch: 'Information Technology',
+                semester: '3rd',
+                role: 'General Member',
+                experience: 'Web development\nMachine learning basics',
+                achievements: ['Coding competition participant'],
+                future_goals: 'To combine web technologies with AI to create intelligent applications.',
+                membership_tier: 'professional',
+                date_time: '2023-05-16T11:00:00',
+                place: 'CS Department'
+            },
+            {
+                name: 'Amit Kumar',
+                email: 'amit.kumar@example.com',
+                enrollment: 'EN2021003',
+                branch: 'Electronics',
+                semester: '5th',
+                role: 'Research Assistant',
+                experience: 'IoT and embedded systems\nPython for data analysis',
+                achievements: ['Published paper on AI in IoT', 'Robotics competition finalist'],
+                future_goals: 'To bridge the gap between hardware and AI for smarter IoT devices.',
+                membership_tier: 'student',
+                date_time: '2023-05-14T09:15:00',
+                place: 'Electronics Lab'
+            },
+            {
+                name: 'Neha Gupta',
+                email: 'neha.gupta@example.com',
+                enrollment: 'EN2021004',
+                branch: 'Mechanical',
+                semester: '2nd',
+                role: 'General Member',
+                experience: 'Beginner in Python\nInterest in robotics',
+                achievements: [],
+                future_goals: 'To apply AI in mechanical systems for automation.',
+                membership_tier: '',
+                date_time: '2023-05-17T14:45:00',
+                place: 'Main Auditorium'
+            },
+            {
+                name: 'Vikram Singh',
+                email: 'vikram.singh@example.com',
+                enrollment: 'EN2021005',
+                branch: 'Computer Science',
+                semester: '6th',
+                role: 'Team Lead',
+                experience: '3 years in ML projects\nNatural Language Processing',
+                achievements: ['Google Summer of Code participant', 'Developed college chatbot'],
+                future_goals: 'To create multilingual AI systems that can understand Indian languages better.',
+                membership_tier: 'oc',
+                date_time: '2023-05-13T16:20:00',
+                place: 'AI Lab, Block B'
+            },
+            {
+                name: 'Ananya Joshi',
+                email: 'ananya.joshi@example.com',
+                enrollment: 'EN2021006',
+                branch: 'Information Technology',
+                semester: '4th',
+                role: 'Event Coordinator',
+                experience: 'Data visualization\nBasic ML algorithms',
+                achievements: ['Organized AI workshop', 'Data science competition participant'],
+                future_goals: 'To make data science more accessible to non-technical people through better visualization tools.',
+                membership_tier: 'professional',
+                date_time: '2023-05-18T13:30:00',
+                place: 'IT Department'
+            },
+            {
+                name: 'Rohan Mehta',
+                email: 'rohan.mehta@example.com',
+                enrollment: 'EN2021007',
+                branch: 'Electrical',
+                semester: '3rd',
+                role: 'General Member',
+                experience: 'Circuit design\nBasic Python',
+                achievements: ['Smart home automation project'],
+                future_goals: 'To integrate AI with electrical systems for energy optimization.',
+                membership_tier: '',
+                date_time: '2023-05-19T10:00:00',
+                place: 'Electrical Lab'
+            }
+        ];
+        
+        let filteredStudents = [...students];
+        let currentPage = 1;
+        const rowsPerPage = 6;
+        let currentStudentForIdCard = null;
+        let qrCode = null;
+
+        // Initialize the dashboard
+        function initDashboard() {
+            // Set table view as default active
+            document.getElementById('tableView').style.display = 'block';
+            document.getElementById('cardView').style.display = 'none';
+            document.getElementById('tableViewBtn').classList.add('bg-blue-700');
+            document.getElementById('tableViewBtn').classList.remove('bg-blue-800');
+            document.getElementById('cardViewBtn').classList.add('bg-blue-800');
+            document.getElementById('cardViewBtn').classList.remove('bg-blue-700');
+            
+            renderTable();
+            renderCards();
+            renderPagination();
+            setupEventListeners();
+            setupSelectionHandlers();
+        }
+
+        // Render table view
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+            paginatedStudents.forEach(student => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-700 flex items-center justify-center">
+                                <i class="fas fa-user text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium">${student.name}</div>
+                                <div class="text-xs text-blue-300">${student.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${student.enrollment}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${student.branch}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${student.semester}
+                    </td>
+                    <td class="px-8 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <button onclick="viewAndGenerateIdCard('${student.enrollment}')" class="text-blue-400 hover:text-blue-300" title="View Details and Generate ID Card">
+                            <i class="fas fa-id-card"></i>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="student-checkbox rounded text-blue-600" value="${student.enrollment}">
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render card view
+        function renderCards() {
+            const cardView = document.getElementById('cardView');
+            cardView.innerHTML = '';
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+            paginatedStudents.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-xl p-6 hover-grow transition-all shadow-lg';
+                card.innerHTML = `
+                    <div class="flex items-start mb-4">
+                        <div class="h-12 w-12 rounded-full ${getTierColorClass(student.membership_tier)} flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">${student.name}</h3>
+                            <p class="text-blue-300 text-sm">${student.enrollment}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-gray-400 text-sm">Branch</p>
+                            <p>${student.branch}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Semester</p>
+                            <p>${student.semester}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Role</p>
+                            <p>${student.role}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Tier</p>
+                            <p class="${getTierTextColorClass(student.membership_tier)}">${student.membership_tier}</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-gray-400 text-sm">Achievements</p>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            ${student.achievements.map(ach => `<span class="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-100">${ach}</span>`).join('')}
+                            ${student.achievements.length === 0 ? '<span class="text-xs text-gray-500">None yet</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
+                        <button onclick="viewAndGenerateIdCard('${student.enrollment}')" class="text-blue-400 hover:text-blue-300 flex items-center">
+                            <i class="fas fa-eye mr-1"></i> View & ID Card
+                        </button>
+                    </div>
+                `;
+                
+                cardView.appendChild(card);
+            });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
+
+            // Previous button state
+            document.getElementById('prevPage').disabled = currentPage === 1;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-4 py-2 rounded-lg ${currentPage === i ? 'bg-blue-700' : 'bg-blue-900 hover:bg-blue-800'} transition-all`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+
+            // Next button state
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+        }
+
+        // View student details and generate ID card
+        function viewAndGenerateIdCard(enrollment) {
+            const student = students.find(s => s.enrollment === enrollment);
+            if (!student) return;
+
+            // Fill details in the modal
+            document.getElementById('detailName').textContent = student.name;
+            document.getElementById('detailEnrollment').textContent = student.enrollment;
+            document.getElementById('detailEmail').textContent = student.email;
+            document.getElementById('detailBranch').textContent = student.branch;
+            document.getElementById('detailSemester').textContent = student.semester;
+            document.getElementById('detailTier').textContent = student.membership_tier;
+            document.getElementById('detailRole').textContent = student.role;
+            document.getElementById('detailExperience').textContent = student.experience;
+            document.getElementById('detailGoals').textContent = student.future_goals;
+
+            // Clear and rebuild achievements
+            const achievementsContainer = document.getElementById('detailAchievements');
+            achievementsContainer.innerHTML = '';
+            student.achievements.forEach(ach => {
+                const achievement = document.createElement('span');
+                achievement.className = 'text-xs px-3 py-1 rounded-full bg-blue-900 text-blue-100 flex items-center';
+                achievement.innerHTML = `<i class="fas fa-trophy mr-1"></i> ${ach}`;
+                achievementsContainer.appendChild(achievement);
+            });
+            if (student.achievements.length === 0) {
+                achievementsContainer.innerHTML = '<span class="text-gray-500">No achievements recorded</span>';
+            }
+
+            // Fill ID card details
+            document.getElementById('idCardName').textContent = student.name;
+            document.getElementById('idCardEnrollment').textContent = student.enrollment;
+            document.getElementById('idCardEmail').textContent = student.email;
+            document.getElementById('idCardBranch').textContent = student.branch;
+            document.getElementById('idCardSemester').textContent = student.semester;
+            document.getElementById('idCardRole').textContent = student.role;
+            document.getElementById('idCardTier').textContent = student.membership_tier;
+            document.getElementById('idCardEnrollmentNum').textContent = student.enrollment;
+            
+            // Set ID card background based on tier
+            const idCardFront = document.getElementById('idCardFront');
+            idCardFront.className = `id-card-front text-white p-4 ${getTierBackgroundClass(student.membership_tier)}`;
+
+            // Generate QR code
+            const qrContainer = document.getElementById('idCardQrCode');
+            qrContainer.innerHTML = '';
+            if (qrCode) {
+                qrCode.clear();
+            }
+            qrCode = new QRCode(qrContainer, {
+                text: `AAIRO_ID:${student.enrollment}|${student.email}`,
+                width: 100,
+                height: 100,
+                colorDark: "#075985",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            currentStudentForIdCard = student;
+
+            // Show the modal
+            document.getElementById('idCardModal').classList.remove('hidden');
+        }
+
+        // Flip ID card
+        function flipIdCard() {
+            document.getElementById('idCardContainer').classList.toggle('id-card-flipped');
+        }
+
+        // Print ID card
+
+  function printIdCard() {
+    if (!currentStudentForIdCard) return;
+
+    const cardWidth = '3.375in';
+    const cardHeight = '2.125in';
+
+    // Map tier to hex background
+    const tierBgMap = {
+        student: '#16537e',
+        professional:'#274e13',
+        oc: '#000000',
+        default: '#16537e'
+    };
+    const tierKey = (currentStudentForIdCard.membership_tier || '').toLowerCase();
+    const tierBgColor = tierBgMap[tierKey] || tierBgMap.default;
+
+    /** Generate QR to base64 */
+    const tempQR = document.createElement("div");
+    new QRCode(tempQR, {
+        text: `AAIRO_ID:${currentStudentForIdCard.enrollment}|${currentStudentForIdCard.email}`,
+        width: 800,
+        height: 800,
+        colorDark: "#000000",
+        colorLight:  '#ffffff',// background matches tier
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+        let qrSrc = "";
+        const qrCanvas = tempQR.querySelector("canvas");
+        if (qrCanvas) {
+            qrSrc = qrCanvas.toDataURL("image/png");
+        } else {
+            const qrImg = tempQR.querySelector("img");
+            qrSrc = qrImg ? qrImg.src : "";
+        }
+        if (!qrSrc) {
+            alert("QR code generation failed. Please try again.");
+            return;
+        }
+
+        /** FRONT */
+        const frontHTML = `
+            <div class="id-card">
+                <div style="width:${cardWidth}; height:${cardHeight}; background:${tierBgColor}; color:white; padding:8px; position:relative; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
+                    <img src="https://aairosociety.com/AAIRO_logo" style="position:absolute; inset:0; width:100%; height:100%; opacity:0.2; object-fit:cover;">
+                    <div style="text-align:center; z-index:1;">
+                        <h3 style="margin:0; font-size:14px; font-weight:bold;">AAIRO SOCIETY</h3>
+                        <p style="margin:0; font-size:10px;">${currentStudentForIdCard.branch}</p>
+                    </div>
+<div style="display:flex; align-items:center; z-index:1;">
+    <div style="height:40px; width:40px; border-radius:50%; border:2px solid white; margin-right:6px; background:#1d4ed8; display:flex; align-items:center; justify-content:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+        </svg>
+    </div>
+
+                        <div style="line-height:1;">
+                            <h4 style="margin:0; font-size:12px; font-weight:bold;">${currentStudentForIdCard.name}</h4>
+                            <p style="margin:0; font-size:10px;">${currentStudentForIdCard.enrollment}</p>
+                            <p style="margin:0; font-size:9px;">${currentStudentForIdCard.email}</p>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; font-size:9px; z-index:1;">
+                        <div><strong>Branch:</strong><div>${currentStudentForIdCard.branch}</div></div>
+                        <div><strong>Role:</strong><div>${currentStudentForIdCard.role}</div></div>
+                        <div><strong>Date of recruitment</strong><div>${new Date(currentStudentForIdCard.date_time).toLocaleDateString()}</div></div>
+                        <div><strong>Semester:</strong><div>${currentStudentForIdCard.semester}</div></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        /** BACK */
+        const backHTML = `
+            <div class="id-card-back" style="background:${tierBgColor}; color:white; width:${cardWidth}; height:${cardHeight}; padding:8px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
+                <div class="text-center" style="text-align:center;">
+                    <h3 style="margin:0; font-size:14px; font-weight:bold;">AAIRO SOCIETY</h3>
+                    <p style="margin:0; font-size:10px;">${currentStudentForIdCard.email}</p>
+                </div>
+                <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                    <div style="background:white; padding:6px; border:4px solid white; border-radius:8px;">
+                        <img src="${qrSrc}" width="100" height="100" alt="QR Code" />
+                    </div>
+                </div>
+                <div style="text-align:center; font-size:8px; color:#ddd;">
+                    <p>This card is property of AAIRO Society and must be returned upon request.</p>
+                    <p>Unauthorized duplication is prohibited.</p>
+                </div>
+            </div>
+        `;
+
+        /** PRINT in hidden iframe (no new tab) */
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <html>
+            <head>
+                <title>ID Card</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                <style>
+                    @media print {
+                        body {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 20px;
+                            margin: 0;
+                            height: 100vh;
+                            background: white;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${frontHTML}
+                ${backHTML}
+            </body>
+            </html>
+        `);
+        doc.close();
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 200);
+}
+
+
+
+
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('idCardModal').classList.add('hidden');
+            document.getElementById('idCardContainer').classList.remove('id-card-flipped');
+        }
+
+        // Scan QR code from uploaded image
+        function scanQRCode(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Create canvas to process image
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Get image data for QR scanning
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'dontInvert',
+                    });
+
+                    if (code) {
+                        // Extract enrollment and email from QR data
+                        const qrData = code.data;
+                        console.log("QR raw data:", JSON.stringify(qrData));
+                        const match = qrData.match(/AAIRO_ID:([^|]+)\|(.+)/);
+                        
+                        if (match && match.length === 3) {
+                            const enrollment = match[1];
+                            const email = match[2];
+                            
+                            // Find student in the list
+                            const student = students.find(s => 
+                                s.enrollment === enrollment && s.email === email
+                            );
+                            
+                            if (student) {
+                                // Show student details
+                                viewAndGenerateIdCard(student.enrollment);
+                                
+                                // Highlight in table/card view
+                                currentPage = Math.ceil((students.indexOf(student) + 1) / rowsPerPage);
+                                filterStudents();
+                                
+                                // Scroll to the student
+                                setTimeout(() => {
+                                    const element = document.querySelector(`[onclick="viewAndGenerateIdCard('${student.enrollment}')"]`);
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        element.classList.add('animate-pulse');
+                                        setTimeout(() => {
+                                            element.classList.remove('animate-pulse');
+                                        }, 3000);
+                                    }
+                                }, 500);
+                            } else {
+                                alert('Student not found in records');
+                            }
+                        } else {
+                            alert('Invalid AAIRO ID QR code');
+                        }
+                    } else {
+                        alert('No QR code found in the image');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Filter students based on search input
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filteredStudents = students.filter(student => 
+                student.name.toLowerCase().includes(searchTerm) ||
+                student.enrollment.toLowerCase().includes(searchTerm) ||
+                student.email.toLowerCase().includes(searchTerm) ||
+                student.branch.toLowerCase().includes(searchTerm) ||
+                student.role.toLowerCase().includes(searchTerm) ||
+                student.membership_tier.toLowerCase().includes(searchTerm)
+            );
+            
+            currentPage = 1;
+            renderTable();
+            renderCards();
+            renderPagination();
+        }
+
+        // Helper functions
+        function getTierColorClass(tier) {
+            switch(tier.toLowerCase()) {
+              case 'student': return 'bg-[#16537e] text-white';
+        case 'professional': return 'bg-[#274e13] text-white';
+        case 'oc': return 'bg-black text-white';
+        default: return 'bg-[#16537e] text-white';
+    }
+        }
+
+        function getTierTextColorClass(tier) {
+    switch (tier.toLowerCase()) {
+        case 'student': return 'text-[#16537e]';
+        case 'professional': return 'text-[#274e13]';
+        case 'oc': return 'text-black';
+        default: return 'text-[#16537e]';
+    }
+        }
+
+        function getTierBackgroundClass(tier) {
+    switch (tier.toLowerCase()) {
+        case 'student': return 'membership-student';
+        case 'professional': return 'membership-professional';
+        case 'oc': return 'membership-oc';
+        default: return 'membership-default';
+    }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // View toggle
+            document.getElementById('tableViewBtn').addEventListener('click', () => {
+                document.getElementById('tableView').style.display = 'block';
+                document.getElementById('cardView').style.display = 'none';
+                document.getElementById('tableViewBtn').classList.add('bg-blue-700');
+                document.getElementById('tableViewBtn').classList.remove('bg-blue-800');
+                document.getElementById('cardViewBtn').classList.add('bg-blue-800');
+                document.getElementById('cardViewBtn').classList.remove('bg-blue-700');
+            });
+
+            document.getElementById('cardViewBtn').addEventListener('click', () => {
+                document.getElementById('cardView').style.display = 'grid';
+                document.getElementById('tableView').style.display = 'none';
+                document.getElementById('cardViewBtn').classList.add('bg-blue-700');
+                document.getElementById('cardViewBtn').classList.remove('bg-blue-800');
+                document.getElementById('tableViewBtn').classList.add('bg-blue-800');
+                document.getElementById('tableViewBtn').classList.remove('bg-blue-700');
+            });
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('input', filterStudents);
+
+            // Pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                    renderCards();
+                    renderPagination();
+                }
+            });
+        }
+
+        // Handle member selection
+        function setupSelectionHandlers() {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            const selectAll = document.getElementById('selectAll');
+            const sendEmailsBtn = document.getElementById('sendEmailsBtn');
+            const selectedCount = document.getElementById('selectedCount');
+
+            // Individual checkbox handler
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    updateSelectionUI();
+                });
+            });
+
+            // Select all handler
+            selectAll.addEventListener('change', () => {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAll.checked;
+                });
+                updateSelectionUI();
+            });
+
+            // Send emails button handler
+            sendEmailsBtn.addEventListener('click', sendSelectedEmails);
+        }
+
+        // Update selection UI
+        function updateSelectionUI() {
+            const selected = document.querySelectorAll('.student-checkbox:checked');
+            const sendEmailsBtn = document.getElementById('sendEmailsBtn');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            selectedCount.textContent = `${selected.length} members selected`;
+            sendEmailsBtn.disabled = selected.length === 0;
+        }
+
+        // Send selected emails to API
+        async function sendSelectedEmails() {
+            const selected = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+                                .map(checkbox => checkbox.value);
+            
+            const selectedStudents = students.filter(student => 
+                selected.includes(student.enrollment)
+            );
+            
+            const emails = selectedStudents.map(student => student.email);
+            
+            try {
+                // Replace with your actual API endpoint
+                const response = await fetch('https://api.example.com/send-emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ emails })
+                });
+
+                if (response.ok) {
+                    alert('Emails sent successfully!');
+                } else {
+                    throw new Error('Failed to send emails');
+                }
+            } catch (error) {
+                console.error('Error sending emails:', error);
+                alert('Error sending emails. Please try again.');
+            }
+        }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initDashboard();
+            setupSelectionHandlers();
+        });
+    </script>
+</body>
+</html>
